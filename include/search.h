@@ -7,4 +7,4 @@ void search_directory_recursively(const char* root_directory_path,
                                   const char* search_name,
                                   search_kind_t search_kind);
 
-#endif  // SEARCH_H
+#endif
