@@ -25,10 +25,12 @@ static void recurse_directory(const char* directory_path,
                               const char* search_name,
                               search_kind_t search_kind) {
   DIR* directory_handle = opendir(directory_path);
-
   if (!directory_handle) {
-    fprintf(stderr, "opendir('%s') failed: %s\n", directory_path,
-            strerror(errno));
+    // Only display error if not rleated to permissions
+    if (errno != EACCES && errno != EPERM) {
+      fprintf(stderr, "opendir('%s') failed: %s\n", directory_path,
+              strerror(errno));
+    }
 
     return;
   }
@@ -38,6 +40,7 @@ static void recurse_directory(const char* directory_path,
   while ((directory_entry = readdir(directory_handle)) != NULL) {
     const char* entry_name = directory_entry->d_name;
 
+    // Skip current and parent directories
     if (strcmp(entry_name, ".") == 0 || strcmp(entry_name, "..") == 0) continue;
 
     char full_entry_path[PATH_MAX];
@@ -48,14 +51,17 @@ static void recurse_directory(const char* directory_path,
 
     struct stat entry_stat;
 
-    if (lstat(full_entry_path, &entry_stat) == -1) continue;
+    if (lstat(full_entry_path, &entry_stat) == -1) {
+      // Skip entries that cannot be cannot stat-ed (permission denied, broken
+      // symlink)
+      continue;
+    }
 
     if (S_ISREG(entry_stat.st_mode)) {
-      if (search_kind != SEARCH_KIND_FILE) continue;
-
-      if (!names_equal_case_insensitive(entry_name, search_name)) continue;
-
-      printf("[FILE] %s\n", full_entry_path);
+      if (search_kind == SEARCH_KIND_FILE &&
+          names_equal_case_insensitive(entry_name, search_name)) {
+        printf("[FILE] %s\n", full_entry_path);
+      }
 
       continue;
     }
@@ -66,6 +72,7 @@ static void recurse_directory(const char* directory_path,
         printf("[DIR]  %s\n", full_entry_path);
       }
 
+      // Avoid recursion into symlinked directories
       if (S_ISLNK(entry_stat.st_mode)) continue;
 
       recurse_directory(full_entry_path, search_name, search_kind);

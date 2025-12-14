@@ -13,7 +13,7 @@ bool names_equal_case_insensitive(const char* a, const char* b);
  * buffer on success, otherwise copies input_path into buffer and returns
  * buffer.
  */
-const char* normalize_path(const char* input_path, char* output_buffer,
+const char* normalise_path(const char* input_path, char* output_buffer,
                            size_t buffer_size);
 
 #endif

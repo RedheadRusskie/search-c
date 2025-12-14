@@ -9,12 +9,13 @@
 #include "util.h"
 
 static void print_usage(const char* program_name) {
-  fprintf(stderr,
-          "Usage: %s -f <name> [start_path]\n"
-          "       %s -d <name> [start_path]\n"
-          "Searches recursively from start_path (default /) and prints matches "
-          "with prefixes.\n",
-          program_name, program_name);
+  fprintf(
+      stderr,
+      "Usage: %s -f <name> [start_path]\n"
+      "       %s -d <name> [start_path]\n"
+      "\nSearches recursively from start_path (default /) and prints matches "
+      "with prefixes.\n",
+      program_name, program_name);
 }
 
 int main(int argument_count, char** argument_values) {
@@ -39,9 +40,9 @@ int main(int argument_count, char** argument_values) {
   const char* search_name = argument_values[2];
   const char* start_path_input =
       (argument_count >= 4) ? argument_values[3] : "/";
-  char normalized_start[PATH_MAX];
-  const char* root_directory_path = normalize_path(
-      start_path_input, normalized_start, sizeof(normalized_start));
+  char normalised_start[PATH_MAX];
+  const char* root_directory_path = normalise_path(
+      start_path_input, normalised_start, sizeof(normalised_start));
 
   struct stat stat_info;
 
